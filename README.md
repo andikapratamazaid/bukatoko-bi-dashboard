@@ -4,7 +4,7 @@ An interactive, single-file business intelligence dashboard analysing user behav
 
 Built with plain HTML, CSS and JavaScript (hand-rolled SVG charts). No frameworks, no build step, no external dependencies.
 
-> **Live demo:** [BukaToko BI Dashboard](https://andikapratamazaid.github.io/bukatoko-bi-d ashboard/)
+> **Live demo:** [BukaToko BI Dashboard](https://andikapratamazaid.github.io/bukatoko-bi-dashboard/)
 
 ![BukaToko BI Dashboard, light mode](docs/screenshot.png)
 
