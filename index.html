@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>BukaToko BI Dashboard</title>
+    <style>
+      :root {
+        --navy: #1F3864;
+        --navy-2: #2E5596;
+        --orange: #ED7D31;
+        --bg: #F2F5F9;
+        --card: #FFFFFF;
+        --border: #DFE6F0;
+        --text: #1B2432;
+        --muted: #62708A;
+        --grid: #E4EAF3;
+        --axis: #8494AC;
+        --chip-bg: #EDF1F8;
+        --chip-text: #33456B;
+        --tooltip-bg: #16233F;
+        --tooltip-text: #F2F5FA;
+        --shadow: 0 1px 3px rgba(31, 56, 100, .08);
+        --ins-bg: #1F3864; --pos: #1E7A34; --neg: #B3261E;
+        box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --navy: #8FAADC;
+          --navy-2: #A9C0E8;
+          --bg: #0D1424;
+          --card: #151F36;
+          --border: #27355A;
+          --text: #E9EEF8;
+          --muted: #9DACC9;
+          --grid: #22304F;
+          --axis: #7588A8;
+          --chip-bg: #1D2A49;
+          --chip-text: #C3D2EE;
+          --tooltip-bg: #05080F;
+          --tooltip-text: #EDF2FB;
+          --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+          --ins-bg: #1B2B4D; --pos: #6FCF8B; --neg: #FF8A80;
+        }
+      }
+      :root[data-theme="dark"] {
+          --navy: #8FAADC;
+          --navy-2: #A9C0E8;
+          --bg: #0D1424;
+          --card: #151F36;
+          --border: #27355A;
+          --text: #E9EEF8;
+          --muted: #9DACC9;
+          --grid: #22304F;
+          --axis: #7588A8;
+          --chip-bg: #1D2A49;
+          --chip-text: #C3D2EE;
+          --tooltip-bg: #05080F;
+          --tooltip-text: #EDF2FB;
+          --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+          --ins-bg: #1B2B4D; --pos: #6FCF8B; --neg: #FF8A80;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 20px 16px 8px; }
+
+      /* ---------- header ---------- */
+      header.top {
+        display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 20px;
+        padding: 6px 2px 16px;
+        border-bottom: 3px solid var(--orange);
+        margin-bottom: 18px;
+      }
+      header.top h1 {
+        margin: 0; font-size: 26px; font-weight: 750; letter-spacing: -.01em;
+        color: var(--navy); line-height: 1.15;
+      }
+      header.top .sub { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+      header.top .period {
+        margin-left: auto; text-align: right; font-size: 13px; color: var(--muted);
+      }
+      header.top .period strong { display: block; color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+
+      /* ---------- KPI cards ---------- */
+      .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px; }
+      .kpi {
+        background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--navy);
+        border-radius: 8px; padding: 13px 14px 11px; box-shadow: var(--shadow);
+      }
+      .kpi.accent { border-top-color: var(--orange); }
+      .kpi .label { font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+      .kpi .value { font-size: 27px; font-weight: 750; margin-top: 3px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+      .kpi .note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+      /* ---------- cards & layout ---------- */
+      .card {
+        background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+        box-shadow: var(--shadow); padding: 16px 18px 14px; margin-bottom: 14px;
+        position: relative;
+      }
+      .card h2 { margin: 0; font-size: 16.5px; font-weight: 700; color: var(--text); }
+      .card .desc { color: var(--muted); font-size: 12.5px; margin: 2px 0 8px; }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .grid-2 .card, .grid-3 .card { margin-bottom: 0; }
+      .grid-2, .grid-3 { margin-bottom: 14px; }
+      .grid-3 { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 14px; }
+      .grid-main { display: grid; grid-template-columns: 1.9fr 1fr; gap: 14px; margin-bottom: 14px; }
+      .grid-main .card { margin-bottom: 0; }
+      .footnote { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+
+      /* ---------- filter chips & legends ---------- */
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+      .chip {
+        appearance: none; border: 1px solid var(--border); background: var(--chip-bg); color: var(--chip-text);
+        font: inherit; font-size: 12.5px; font-weight: 600; padding: 4px 11px 4px 8px; border-radius: 999px;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 30px;
+      }
+      .chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+      .chip[aria-pressed="false"] { opacity: .42; }
+      .chip:focus-visible, .legend-item:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+      .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+      .legend-item {
+        appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-size: 12px;
+        display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 2px 0;
+      }
+      .legend-item .sw { width: 16px; height: 3px; border-radius: 2px; background: var(--c); flex: none; }
+      .legend-item[aria-pressed="false"] { opacity: .38; text-decoration: line-through; }
+
+      /* ---------- charts ---------- */
+      .chart-box { position: relative; }
+      svg.chart { display: block; width: 100%; height: auto; }
+      svg.chart text { font-family: inherit; }
+      .tooltip {
+        position: absolute; pointer-events: none; opacity: 0; transition: opacity .12s ease;
+        background: var(--tooltip-bg); color: var(--tooltip-text); border-radius: 7px;
+        padding: 8px 11px; font-size: 12px; line-height: 1.5; z-index: 5; max-width: 240px;
+        box-shadow: 0 6px 18px rgba(10, 18, 38, .28); white-space: nowrap;
+      }
+      .tooltip .tt-title { font-weight: 700; margin-bottom: 2px; }
+      .tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+      .tooltip .tt-row span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+      .tooltip .tt-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+      /* ---------- Q2 bars ---------- */
+      .bar-row { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; padding: 5px 0; }
+      .bar-row .cc { font-weight: 700; font-size: 13px; }
+      .bar-track { background: var(--chip-bg); border-radius: 4px; height: 20px; overflow: hidden; }
+      .bar-fill { height: 100%; border-radius: 4px; background: var(--navy-2); }
+      .bar-fill.lead { background: var(--orange); }
+      .bar-row .vals { font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .bar-row .vals small { color: var(--muted); }
+
+      /* ---------- donut ---------- */
+      .donut-flex { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .donut-legend { font-size: 13px; }
+      .donut-legend .dl-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-variant-numeric: tabular-nums; }
+      .donut-legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+      .donut-legend .dl-val { margin-left: auto; padding-left: 18px; font-weight: 650; }
+      .donut-legend .dl-val small { color: var(--muted); font-weight: 400; }
+
+      /* ---------- funnel ---------- */
+      .f-stage { display: grid; grid-template-columns: 118px 1fr 92px; gap: 12px; align-items: center; padding: 4px 0; }
+      .f-stage .f-name { font-size: 13px; font-weight: 650; text-align: right; }
+      .f-track { height: 30px; }
+      .f-bar { height: 100%; border-radius: 4px; background: var(--navy-2); min-width: 3px; }
+      .f-stage:first-child .f-bar { background: var(--navy); }
+      .f-stage:last-child .f-bar { background: var(--orange); }
+      .f-stage .f-val { font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .f-stage .f-val small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+      .f-conv { margin: 0 0 0 auto; width: calc(100% - 130px); font-size: 11.5px; color: var(--muted); padding: 1px 0 3px; }
+      .f-conv b { color: var(--orange); font-weight: 700; }
+
+      /* ---------- event mix ---------- */
+      .mix-row { display: grid; grid-template-columns: 92px 1fr 52px; gap: 10px; align-items: center; padding: 4px 0; font-size: 12.5px; }
+      .mix-row .m-name { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .mix-row .m-track { background: var(--chip-bg); height: 13px; border-radius: 3px; overflow: hidden; }
+      .mix-row .m-fill { height: 100%; background: var(--navy-2); border-radius: 3px; }
+      .mix-row .m-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+      /* ---------- insights ---------- */
+      .insights { background: var(--ins-bg); border-color: var(--ins-bg); color: #EDF2FA; }
+      .insights h2 { color: #FFFFFF; }
+      .insights ul { margin: 10px 0 2px; padding: 0; list-style: none; }
+      .insights li { padding: 9px 0 9px 0; border-top: 1px solid rgba(255, 255, 255, .16); font-size: 13.5px; line-height: 1.5; }
+      .insights li:first-child { border-top: 0; padding-top: 2px; }
+      .insights li b { color: #F5B183; font-weight: 700; }
+      .insights li .big { font-size: 17px; font-weight: 750; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+
+      footer {
+        color: var(--muted); font-size: 12.5px; text-align: center; padding: 10px 0 26px;
+      }
+      footer b { color: var(--text); }
+
+      @media (max-width: 1020px) {
+        .kpis { grid-template-columns: repeat(3, 1fr); }
+        .grid-3 { grid-template-columns: 1fr 1fr; }
+        .grid-main { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 720px) {
+        .kpis { grid-template-columns: repeat(2, 1fr); }
+        .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        header.top .period { margin-left: 0; text-align: left; }
+        header.top h1 { font-size: 23px; }
+        .f-stage { grid-template-columns: 92px 1fr 74px; gap: 8px; }
+        .f-conv { width: calc(100% - 100px); }
+        .card { padding: 14px 13px 12px; }
+      }
+      .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+      .tbl th, .tbl td { padding: 5px 6px; text-align: right; border-top: 1px solid var(--border); }
+      .tbl th:first-child, .tbl td:first-child { text-align: left; }
+      .tbl th { color: var(--muted); font-weight: 650; border-top: 0; }
+      .tbl .up { color: var(--pos); font-weight: 650; } .tbl .down { color: var(--neg); font-weight: 650; }
+      .notes { margin: 8px 0 0; padding-left: 18px; font-size: 13px; } .notes li { margin: 4px 0; }
+      @media (prefers-reduced-motion: reduce) {
+        .tooltip { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <header class="top">
+        <div>
+          <h1>BukaToko BI Dashboard</h1>
+          <div class="sub">User behaviour &amp; conversion funnel &mdash; e-commerce event analytics</div>
+        </div>
+        <div class="period">
+          Reporting period
+          <strong>27 Mar &ndash; 23 Sep 2025</strong>
+        </div>
+      </header>
+
+      <!-- KPI cards -->
+      <section class="kpis" aria-label="Key figures">
+        <div class="kpi">
+          <div class="label">Total Events</div>
+          <div class="value">10,000</div>
+          <div class="note">All tracked user actions</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Unique Users</div>
+          <div class="value">1,982</div>
+          <div class="note">Across 8 countries</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Sessions</div>
+          <div class="value">10,000</div>
+          <div class="note">1 event per session in this dataset</div>
+        </div>
+        <div class="kpi accent">
+          <div class="label">Purchasing Users</div>
+          <div class="value">449</div>
+          <div class="note">22.7% of all users made at least one purchase</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Searching Users</div>
+          <div class="value">750</div>
+          <div class="note">Ran at least one search</div>
+        </div>
+        <div class="kpi accent">
+          <div class="label">Same-Day Search &rarr; Cart</div>
+          <div class="value">0.13%</div>
+          <div class="note">Just 1 of 750 searching users</div>
+        </div>
+      </section>
+
+      <!-- Daily trend -->
+      <section class="card" aria-labelledby="daily-h">
+        <h2 id="daily-h">Daily Events Trend</h2>
+        <p class="desc">Events per day, all countries combined by default. Toggle countries to filter the trend.</p>
+        <div class="chips" id="country-chips" role="group" aria-label="Filter daily trend by country"></div>
+        <div class="chart-box">
+          <div id="daily-chart"></div>
+          <div class="tooltip" id="daily-tip"></div>
+        </div>
+        <p class="footnote">March covers 27&ndash;31 Mar only and September ends 23 Sep, so both edge months are partial. Across the full period the average is 55 events per day (range 27&ndash;81, peak 81 on 19 Jul); weekdays are flat at 54&ndash;57 events on average, so there is no clear weekly pattern.</p>
+      </section>
+
+      <!-- MAU charts -->
+      <div class="grid-2">
+        <section class="card" aria-labelledby="mauc-h">
+          <h2 id="mauc-h">Monthly Active Users by Channel</h2>
+          <p class="desc">Distinct active users per acquisition channel, Mar&ndash;Sep 2025.</p>
+          <div class="chart-box">
+            <div id="mau-channel-chart"></div>
+            <div class="tooltip" id="mau-channel-tip"></div>
+          </div>
+          <div class="legend" id="mau-channel-legend"></div>
+        </section>
+        <section class="card" aria-labelledby="mauk-h">
+          <h2 id="mauk-h">Monthly Active Users by Country</h2>
+          <p class="desc">Distinct active users per country, Mar&ndash;Sep 2025.</p>
+          <div class="chart-box">
+            <div id="mau-country-chart"></div>
+            <div class="tooltip" id="mau-country-tip"></div>
+          </div>
+          <div class="legend" id="mau-country-legend"></div>
+        </section>
+      </div>
+
+      <!-- Total MAU strip -->
+      <section class="card" aria-labelledby="maut-h">
+        <h2 id="maut-h">Total Monthly Active Users</h2>
+        <p class="desc">All channels and countries combined. Full months (Apr&ndash;Aug) sit in a narrow 1,129&ndash;1,170 band &mdash; a flat, stable audience.</p>
+        <div class="chart-box">
+          <div id="mau-total-chart"></div>
+          <div class="tooltip" id="mau-total-tip"></div>
+        </div>
+        <p class="footnote">* Partial month: data starts 27 Mar 2025 and ends 23 Sep 2025, so March and September undercount a full month.</p>
+      </section>
+
+      <!-- Q2 / device / event mix -->
+      <div class="grid-3">
+        <section class="card" aria-labelledby="q2-h">
+          <h2 id="q2-h">Most Active Country &mdash; Q2 2025</h2>
+          <p class="desc">Distinct active users per country, Apr&ndash;Jun 2025. Bars overlap and sum to 4,189, versus 1,848 distinct Q2 users overall, because a user seen in several countries counts in each.</p>
+          <div id="q2-bars"></div>
+        </section>
+        <section class="card" aria-labelledby="dev-h">
+          <h2 id="dev-h">Sessions by Device</h2>
+          <p class="desc">Share of 10,000 sessions. Mobile accounts for 89.6% of all sessions.</p>
+          <div class="donut-flex">
+            <div id="device-donut"></div>
+            <div class="donut-legend" id="device-legend"></div>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="mix-h">
+          <h2 id="mix-h">Event Mix</h2>
+          <p class="desc">Volume by event type across the full period (10,000 events).</p>
+          <div id="event-mix"></div>
+        </section>
+      </div>
+
+      <!-- Funnel + insights -->
+      <div class="grid-main">
+        <section class="card" aria-labelledby="fun-h">
+          <h2 id="fun-h">Conversion Funnel (User Level)</h2>
+          <p class="desc">Distinct users reaching each stage at any point in the period (stage counts, not a strict cohort). The biggest drop is product view &rarr; add to cart (53.2% continue); cart &rarr; checkout is 58.6%, and once users check out, 99.1% purchase.</p>
+          <div id="funnel"></div>
+          <p class="footnote">Overall, purchasing users equal 28.4% of page-view users (449 / 1,581) and 58.1% of add-to-cart users (449 / 773).</p>
+        </section>
+        <section class="card insights" aria-labelledby="ins-h">
+          <h2 id="ins-h">Key Insights</h2>
+          <ul>
+            <li><span class="big">Indonesia leads.</span> <b>1,055</b> active users in Q2 2025, ahead of the US (815) &mdash; about 57% of the 1,848 distinct Q2 users, and 29% of all events (2,936).</li>
+            <li><span class="big">Audience is flat.</span> Total MAU held between <b>1,129 and 1,170</b> in every full month from April to August &mdash; stable, not growing.</li>
+            <li><span class="big">Referral is the only clear riser.</span> Referral MAU rose <b>+19.7%</b> from April to August (244 &rarr; 292, with a July dip to 255), while social fell <b>&minus;13.0%</b> (276 &rarr; 240).</li>
+            <li><span class="big">Mobile first.</span> <b>89.6%</b> of sessions are Android or iOS; desktop is only 10.4%.</li>
+            <li><span class="big">Search converts late.</span> Only <b>0.13%</b> of searching users (1 of 750) added to cart the same day they searched &mdash; search intent pays off on later days, so attribution windows matter.</li>
+            <li><span class="big">Vietnam is shrinking.</span> VN MAU fell <b>&minus;23.7%</b> from April to August (173 &rarr; 132), the steepest country decline; the US is down 9.3% (332 &rarr; 301).</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="grid-2">
+        <section class="card" aria-labelledby="chg1-h"><h2 id="chg1-h">MAU Change by Channel</h2><p class="desc">April vs August 2025 (full months), sorted by change.</p><div id="chg-channel"></div></section>
+        <section class="card" aria-labelledby="chg2-h"><h2 id="chg2-h">MAU Change by Country</h2><p class="desc">April vs August 2025 (full months), sorted by change.</p><div id="chg-country"></div></section>
+      </div>
+      <section class="card" aria-labelledby="notes-h">
+        <h2 id="notes-h">Data Notes &amp; Caveats</h2>
+        <ul class="notes">
+          <li>Every session holds exactly one event (10,000 sessions = 10,000 events), so session depth and duration cannot be analysed.</li>
+          <li>Users appear in more than one country and channel, so country and channel figures overlap: the April channel MAU values sum to 1,570 against 1,142 total users.</li>
+          <li>Purchase events (509) exceed checkout events (503), so a few purchases have no recorded checkout; at user level the gap is 453 vs 449.</li>
+          <li>March (27&ndash;31 Mar, 239 events) and September (to 23 Sep, 1,270 events) are partial months; compare full months only.</li>
+          <li>Total MAU, the Q2 total of 1,848 and the search figures (750 users, 1 same-day) come from the source analysis and cannot be recomputed from the aggregates in this file.</li>
+        </ul>
+      </section>
+
+      <footer>
+        Data source: <b>BukaToko case study dataset</b> (10,000 events, cleaned) &middot; Python for Data Analyst &middot; Analysis by <b>Andika Pratama Zaid</b>
+      </footer>
+    </div>
+
+    <script>
+      "use strict";
+      /* Verified aggregates from the cleaned BukaToko dataset (10,000 events),
+         computed in ~/workspace/bukatoko-analysis/dashboard_data.json */
+      const DATA = {"kpi": {"events": 10000, "users": 1982, "sessions": 10000, "countries": 8, "purchases_users": 449, "search_users": 750, "same_day_pct": 0.13, "period": "27 Mar \u2013 23 Sep 2025"}, "daily": {"dates": ["2025-03-27", "2025-03-28", "2025-03-29", "2025-03-30", "2025-03-31", "2025-04-01", "2025-04-02", "2025-04-03", "2025-04-04", "2025-04-05", "2025-04-06", "2025-04-07", "2025-04-08", "2025-04-09", "2025-04-10", "2025-04-11", "2025-04-12", "2025-04-13", "2025-04-14", "2025-04-15", "2025-04-16", "2025-04-17", "2025-04-18", "2025-04-19", "2025-04-20", "2025-04-21", "2025-04-22", "2025-04-23", "2025-04-24", "2025-04-25", "2025-04-26", "2025-04-27", "2025-04-28", "2025-04-29", "2025-04-30", "2025-05-01", "2025-05-02", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-05-07", "2025-05-08", "2025-05-09", "2025-05-10", "2025-05-11", "2025-05-12", "2025-05-13", "2025-05-14", "2025-05-15", "2025-05-16", "2025-05-17", "2025-05-18", "2025-05-19", "2025-05-20", "2025-05-21", "2025-05-22", "2025-05-23", "2025-05-24", "2025-05-25", "2025-05-26", "2025-05-27", "2025-05-28", "2025-05-29", "2025-05-30", "2025-05-31", "2025-06-01", "2025-06-02", "2025-06-03", "2025-06-04", "2025-06-05", "2025-06-06", "2025-06-07", "2025-06-08", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-14", "2025-06-15", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-21", "2025-06-22", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-28", "2025-06-29", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-05", "2025-07-06", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-12", "2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19", "2025-07-20", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-26", "2025-07-27", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-02", "2025-08-03", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-09", "2025-08-10", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-15", "2025-08-16", "2025-08-17", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-23", "2025-08-24", "2025-08-25", "2025-08-26", "2025-08-27", "2025-08-28", "2025-08-29", "2025-08-30", "2025-08-31", "2025-09-01", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-06", "2025-09-07", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-13", "2025-09-14", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-20", "2025-09-21", "2025-09-22", "2025-09-23"], "series": {"AU": [0, 4, 0, 4, 7, 4, 3, 1, 2, 4, 2, 1, 0, 1, 2, 2, 3, 1, 4, 2, 1, 6, 3, 3, 0, 2, 4, 5, 2, 6, 3, 1, 0, 3, 4, 0, 2, 3, 3, 2, 1, 1, 4, 4, 4, 4, 3, 0, 3, 1, 1, 4, 5, 4, 1, 1, 2, 0, 3, 2, 5, 2, 3, 1, 0, 2, 3, 4, 2, 4, 4, 2, 2, 2, 4, 4, 1, 1, 1, 1, 4, 1, 2, 5, 2, 8, 5, 2, 3, 3, 4, 5, 0, 6, 0, 0, 4, 3, 3, 4, 3, 5, 0, 3, 5, 5, 1, 1, 2, 3, 0, 4, 5, 2, 2, 1, 3, 2, 3, 0, 0, 3, 4, 1, 0, 4, 3, 2, 3, 2, 1, 3, 1, 5, 1, 3, 7, 3, 2, 1, 1, 2, 1, 3, 2, 3, 4, 3, 3, 1, 3, 7, 1, 2, 2, 6, 5, 0, 2, 1, 1, 5, 3, 1, 1, 4, 8, 7, 2, 4, 6, 2, 3, 1, 2, 6, 2, 2, 6, 5, 1], "ID": [7, 14, 17, 15, 11, 10, 13, 21, 19, 10, 11, 23, 16, 16, 16, 16, 15, 27, 15, 13, 14, 10, 18, 18, 9, 23, 21, 21, 13, 14, 15, 12, 13, 19, 17, 21, 19, 8, 10, 15, 15, 15, 14, 16, 8, 17, 18, 21, 13, 13, 18, 15, 13, 21, 15, 17, 12, 14, 20, 21, 23, 19, 19, 18, 25, 15, 12, 17, 12, 14, 15, 16, 16, 21, 15, 24, 18, 15, 11, 13, 17, 18, 13, 23, 21, 24, 15, 16, 18, 21, 16, 15, 18, 17, 14, 19, 15, 22, 13, 14, 14, 16, 12, 30, 12, 16, 15, 14, 14, 14, 18, 17, 17, 11, 20, 18, 19, 22, 21, 21, 11, 16, 19, 17, 16, 15, 15, 18, 16, 15, 20, 16, 15, 17, 21, 21, 18, 17, 17, 17, 5, 17, 13, 20, 12, 17, 18, 16, 18, 18, 10, 16, 21, 18, 16, 22, 13, 17, 14, 15, 20, 9, 15, 10, 19, 19, 13, 20, 14, 15, 18, 15, 14, 17, 10, 15, 20, 20, 11, 21, 9], "MY": [6, 4, 4, 5, 7, 3, 8, 4, 4, 4, 5, 9, 5, 10, 5, 4, 3, 7, 10, 1, 4, 5, 7, 7, 4, 1, 9, 9, 7, 3, 3, 5, 9, 5, 4, 7, 5, 2, 1, 7, 8, 2, 5, 7, 6, 3, 6, 6, 11, 6, 8, 6, 7, 6, 4, 3, 3, 6, 7, 2, 9, 2, 8, 8, 6, 12, 7, 3, 8, 9, 5, 5, 3, 12, 5, 2, 3, 4, 9, 4, 6, 4, 11, 5, 6, 5, 4, 3, 8, 5, 4, 13, 2, 3, 10, 4, 6, 3, 1, 7, 4, 3, 5, 7, 6, 8, 8, 2, 7, 6, 8, 0, 6, 2, 8, 5, 7, 7, 8, 5, 2, 2, 7, 5, 9, 6, 5, 8, 6, 3, 6, 6, 6, 6, 9, 10, 9, 2, 5, 4, 5, 4, 8, 7, 7, 5, 4, 6, 3, 3, 8, 5, 7, 4, 5, 3, 5, 6, 8, 4, 6, 5, 2, 3, 8, 8, 2, 2, 11, 4, 9, 9, 5, 6, 3, 11, 8, 9, 7, 10, 2], "PH": [3, 5, 8, 6, 8, 5, 6, 8, 8, 5, 7, 3, 7, 7, 7, 6, 5, 4, 5, 9, 3, 7, 5, 7, 5, 7, 6, 7, 4, 5, 8, 5, 7, 4, 5, 2, 3, 2, 6, 10, 6, 4, 3, 6, 9, 4, 7, 4, 11, 2, 5, 3, 1, 5, 5, 13, 6, 3, 6, 8, 8, 8, 8, 4, 4, 6, 9, 5, 13, 2, 11, 7, 3, 3, 6, 7, 7, 7, 5, 3, 2, 3, 9, 6, 2, 5, 11, 5, 5, 6, 8, 5, 5, 3, 8, 6, 5, 4, 5, 2, 2, 6, 6, 6, 9, 4, 7, 6, 5, 9, 4, 5, 7, 7, 10, 9, 8, 4, 8, 7, 4, 8, 9, 4, 9, 4, 2, 8, 12, 12, 3, 5, 6, 2, 10, 2, 7, 5, 5, 6, 5, 4, 4, 9, 7, 7, 7, 2, 2, 9, 6, 3, 3, 4, 7, 9, 10, 3, 2, 5, 5, 3, 3, 10, 7, 7, 6, 6, 8, 8, 7, 3, 6, 5, 10, 5, 7, 3, 8, 5, 3], "SG": [2, 3, 7, 4, 7, 7, 7, 7, 4, 4, 4, 3, 4, 7, 8, 2, 6, 8, 15, 7, 4, 7, 4, 6, 6, 3, 3, 5, 6, 7, 8, 4, 6, 4, 4, 6, 5, 10, 9, 5, 1, 3, 4, 4, 8, 3, 5, 6, 5, 4, 4, 5, 5, 2, 1, 6, 8, 5, 6, 10, 4, 6, 5, 7, 4, 6, 6, 9, 5, 8, 3, 4, 5, 4, 8, 6, 5, 8, 8, 4, 6, 8, 8, 2, 8, 10, 4, 10, 9, 4, 7, 8, 3, 9, 6, 4, 4, 6, 10, 4, 9, 6, 6, 6, 2, 5, 5, 2, 11, 3, 5, 8, 4, 9, 9, 8, 5, 3, 7, 6, 6, 5, 4, 5, 6, 4, 8, 8, 1, 9, 2, 2, 2, 4, 4, 4, 7, 3, 2, 6, 2, 2, 5, 7, 3, 4, 5, 10, 3, 6, 4, 10, 9, 5, 3, 6, 8, 4, 6, 6, 9, 11, 6, 4, 11, 4, 4, 4, 6, 4, 4, 10, 8, 4, 5, 5, 7, 4, 7, 4, 2], "TH": [1, 2, 2, 0, 2, 3, 0, 2, 0, 2, 5, 0, 3, 5, 3, 2, 2, 2, 0, 2, 4, 3, 3, 4, 5, 3, 8, 1, 2, 2, 1, 4, 1, 2, 3, 4, 5, 0, 4, 4, 3, 4, 3, 3, 3, 3, 2, 3, 2, 1, 3, 1, 0, 2, 1, 2, 1, 5, 2, 2, 3, 1, 5, 4, 2, 3, 3, 3, 1, 4, 3, 2, 2, 3, 2, 2, 5, 2, 5, 2, 3, 2, 1, 6, 3, 5, 2, 5, 5, 7, 3, 2, 4, 0, 2, 2, 3, 2, 2, 1, 3, 5, 1, 1, 7, 1, 4, 0, 4, 4, 3, 4, 3, 1, 4, 5, 3, 2, 2, 5, 2, 1, 2, 2, 3, 2, 4, 1, 6, 1, 2, 4, 3, 3, 4, 1, 3, 0, 3, 6, 1, 4, 2, 2, 1, 3, 3, 2, 0, 4, 4, 2, 5, 1, 3, 3, 2, 5, 2, 5, 1, 5, 4, 2, 2, 1, 1, 5, 4, 5, 3, 5, 0, 3, 2, 3, 3, 5, 6, 1, 3], "US": [6, 10, 11, 18, 13, 7, 14, 14, 12, 12, 16, 15, 12, 9, 17, 6, 11, 12, 11, 17, 16, 14, 14, 7, 11, 8, 11, 9, 19, 10, 13, 9, 14, 4, 15, 11, 10, 9, 12, 14, 8, 8, 11, 8, 13, 11, 10, 18, 10, 13, 9, 13, 12, 13, 9, 11, 11, 9, 13, 10, 11, 9, 8, 9, 11, 15, 11, 14, 14, 9, 11, 7, 11, 11, 16, 11, 8, 6, 7, 8, 14, 9, 10, 16, 17, 11, 12, 15, 15, 10, 5, 12, 15, 7, 13, 9, 18, 19, 7, 10, 11, 14, 14, 12, 11, 10, 9, 10, 8, 7, 10, 9, 12, 6, 17, 10, 8, 13, 12, 11, 13, 6, 15, 10, 8, 15, 14, 12, 13, 10, 12, 8, 4, 18, 16, 16, 19, 14, 9, 9, 8, 6, 10, 10, 8, 11, 10, 13, 10, 8, 7, 12, 11, 6, 8, 11, 8, 7, 8, 7, 13, 7, 13, 9, 11, 12, 9, 12, 4, 11, 11, 15, 15, 8, 7, 10, 9, 14, 6, 10, 7], "VN": [2, 4, 3, 3, 4, 6, 3, 6, 11, 7, 3, 12, 7, 7, 8, 3, 7, 4, 3, 6, 7, 4, 4, 6, 5, 6, 4, 11, 7, 4, 9, 5, 5, 2, 6, 7, 5, 9, 6, 7, 9, 7, 3, 6, 10, 6, 2, 6, 7, 5, 6, 6, 2, 7, 7, 6, 4, 2, 8, 6, 5, 3, 6, 5, 8, 6, 9, 4, 9, 11, 4, 7, 7, 7, 9, 3, 5, 7, 9, 2, 5, 6, 6, 3, 14, 2, 4, 7, 2, 7, 6, 7, 6, 7, 3, 3, 3, 6, 3, 6, 7, 6, 9, 5, 5, 8, 6, 10, 3, 2, 8, 4, 1, 2, 11, 9, 6, 8, 3, 8, 7, 7, 5, 4, 7, 3, 4, 6, 7, 4, 5, 4, 6, 2, 5, 4, 1, 7, 6, 5, 3, 6, 2, 4, 5, 8, 7, 2, 6, 3, 3, 3, 3, 5, 4, 2, 3, 5, 2, 4, 11, 2, 6, 6, 8, 5, 6, 6, 12, 6, 6, 6, 9, 7, 5, 4, 6, 1, 12, 3, 1]}}, "mau_channel": {"months": ["2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09"], "series": {"direct": [41, 262, 270, 271, 257, 250, 186], "email": [33, 258, 284, 263, 290, 248, 209], "organic": [34, 260, 251, 259, 268, 249, 208], "paid_search": [38, 255, 259, 258, 288, 251, 206], "referral": [50, 244, 244, 289, 255, 292, 197], "social": [40, 276, 268, 262, 250, 240, 174], "unknown": [2, 15, 13, 15, 15, 20, 20]}}, "mau_country": {"months": ["2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09"], "series": {"AU": [15, 73, 70, 81, 79, 82, 74], "ID": [64, 425, 461, 452, 458, 440, 329], "MY": [26, 160, 173, 165, 162, 171, 137], "PH": [30, 168, 162, 169, 175, 177, 127], "SG": [22, 161, 157, 180, 172, 141, 130], "TH": [7, 76, 80, 91, 81, 81, 67], "US": [57, 332, 313, 302, 315, 301, 218], "VN": [16, 173, 171, 174, 166, 132, 131]}}, "q2_country": [{"country": "ID", "users": 1055, "events": 1490}, {"country": "US", "users": 815, "events": 1032}, {"country": "VN", "users": 485, "events": 541}, {"country": "PH", "users": 464, "events": 526}, {"country": "MY", "users": 460, "events": 515}, {"country": "SG", "users": 459, "events": 521}, {"country": "TH", "users": 236, "events": 249}, {"country": "AU", "users": 215, "events": 231}], "device": {"android": 4961, "desktop": 1039, "ios": 4000}, "funnel": [{"stage": "page_view", "users": 1581}, {"stage": "product_view", "users": 1454}, {"stage": "add_to_cart", "users": 773}, {"stage": "checkout", "users": 453}, {"stage": "purchase", "users": 449}], "event_mix": {"page_view": 2983, "product_view": 2552, "login": 1047, "add_to_cart": 970, "search": 945, "purchase": 509, "checkout": 503, "logout": 491}};
+
+      DATA.mau_total = [225, 1142, 1147, 1170, 1139, 1129, 938]; /* distinct users per month, from source analysis */
+
+      const COUNTRY_COLORS = {
+        ID: "#ED7D31", US: "#6B5BD2", VN: "#2E75B6", PH: "#70AD47",
+        MY: "#D9A400", SG: "#0E9594", TH: "#B03A5B", AU: "#7F7F7F"
+      };
+      const COUNTRY_NAMES = {
+        ID: "Indonesia", US: "United States", VN: "Vietnam", PH: "Philippines",
+        MY: "Malaysia", SG: "Singapore", TH: "Thailand", AU: "Australia"
+      };
+      const CHANNEL_COLORS = {
+        direct: "#6B5BD2", email: "#2E75B6", organic: "#70AD47",
+        paid_search: "#ED7D31", referral: "#D9A400", social: "#0E9594", unknown: "#9AA5B5"
+      };
+      const CHANNEL_NAMES = {
+        direct: "Direct", email: "Email", organic: "Organic",
+        paid_search: "Paid Search", referral: "Referral", social: "Social", unknown: "Unknown"
+      };
+      const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+      const fmt = n => n.toLocaleString("en-US");
+      const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+      function niceMax(v) {
+        if (v <= 10) return 10;
+        const pow = Math.pow(10, Math.floor(Math.log10(v)));
+        const steps = [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+        for (const s of steps) if (v <= s * pow) return s * pow;
+        return 10 * pow;
+      }
+
+      /* Generic multi-series line chart rendered as SVG with a hover tooltip.
+         cfg: { el, tip, labels[], series: [{key,name,color,values[],dash}], yLabel, partialIdx:Set } */
+      function lineChart(cfg) {
+        const W = cfg.width || 920, H = cfg.height || 300;
+        const m = { t: 14, r: 14, b: 28, l: 46 };
+        const iw = W - m.l - m.r, ih = H - m.t - m.b;
+        const grid = cssVar("--grid"), axis = cssVar("--axis");
+        const visible = cfg.series.filter(s => !s.hidden);
+        let maxV = 0;
+        visible.forEach(s => s.values.forEach(v => { if (v > maxV) maxV = v; }));
+        const yMax = niceMax(maxV * 1.08);
+        const n = cfg.labels.length;
+        const X = i => m.l + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
+        const Y = v => m.t + ih - (v / yMax) * ih;
+
+        let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${cfg.aria || ""}">`;
+        const ticks = 4;
+        for (let t = 0; t <= ticks; t++) {
+          const v = (yMax / ticks) * t, y = Y(v);
+          svg += `<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="${grid}" stroke-width="1"/>`;
+          svg += `<text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${axis}">${fmt(Math.round(v))}</text>`;
+        }
+        cfg.labels.forEach((lab, i) => {
+          if (cfg.labelEvery && i % cfg.labelEvery !== 0 && i !== n - 1) return;
+          const partial = cfg.partialIdx && cfg.partialIdx.has(i);
+          svg += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="${axis}">${lab}${partial ? "*" : ""}</text>`;
+        });
+        if (cfg.area && visible.length === 1) {
+          const s = visible[0];
+          let d = `M ${X(0)} ${Y(s.values[0])}`;
+          s.values.forEach((v, i) => { if (i) d += ` L ${X(i)} ${Y(v)}`; });
+          svg += `<path d="${d} L ${X(n - 1)} ${Y(0)} L ${X(0)} ${Y(0)} Z" fill="${s.color}" opacity="0.14"/>`;
+        }
+        visible.forEach(s => {
+          let d = "";
+          s.values.forEach((v, i) => { d += (i ? " L " : "M ") + X(i).toFixed(1) + " " + Y(v).toFixed(1); });
+          svg += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2}" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}/>`;
+          if (cfg.dots) s.values.forEach((v, i) => {
+            svg += `<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="${s.color}"/>`;
+          });
+        });
+        svg += `<g class="hover-g" style="display:none"><line class="hover-line" y1="${m.t}" y2="${m.t + ih}" stroke="${axis}" stroke-width="1" stroke-dasharray="3 3"/><circle class="hover-dot" r="4.5" fill="#fff" stroke-width="2.5"/></g>`;
+        svg += `<rect class="hover-zone" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+        svg += `</svg>`;
+        cfg.el.innerHTML = svg;
+
+        const svgEl = cfg.el.querySelector("svg");
+        const zone = svgEl.querySelector(".hover-zone");
+        const hg = svgEl.querySelector(".hover-g");
+        const hLine = hg.querySelector(".hover-line");
+        const hDot = hg.querySelector(".hover-dot");
+        const tip = cfg.tip;
+        function move(evt) {
+          const rect = svgEl.getBoundingClientRect();
+          const pt = evt.touches ? evt.touches[0] : evt;
+          const px = (pt.clientX - rect.left) * (W / rect.width);
+          let i = Math.round(((px - m.l) / iw) * (n - 1));
+          i = Math.max(0, Math.min(n - 1, i));
+          hg.style.display = "";
+          hLine.setAttribute("x1", X(i)); hLine.setAttribute("x2", X(i));
+          const lead = cfg.leadKey ? visible.find(s => s.key === cfg.leadKey) : visible[0];
+          if (lead) {
+            hDot.setAttribute("cx", X(i)); hDot.setAttribute("cy", Y(lead.values[i]));
+            hDot.setAttribute("stroke", lead.color);
+          } else { hDot.style.display = "none"; }
+          let html = `<div class="tt-title">${cfg.tipTitle(i)}</div>`;
+          visible.forEach(s => {
+            html += `<div class="tt-row"><span><i class="tt-dot" style="background:${s.color}"></i>${s.name}</span><b>${fmt(s.values[i])}</b></div>`;
+          });
+          if (cfg.tipTotal && visible.length > 1) {
+            const tot = visible.reduce((a, s) => a + s.values[i], 0);
+            html += `<div class="tt-row" style="border-top:1px solid rgba(255,255,255,.25);margin-top:3px;padding-top:3px"><span>Total</span><b>${fmt(tot)}</b></div>`;
+          }
+          tip.innerHTML = html;
+          tip.style.opacity = "1";
+          const box = cfg.el.parentElement.getBoundingClientRect();
+          let tx = (X(i) / W) * box.width + 14;
+          let ty = (pt.clientY - box.top) - 10;
+          if (tx + 250 > box.width) tx -= 264;
+          tip.style.left = Math.max(0, tx) + "px";
+          tip.style.top = Math.max(0, ty) + "px";
+        }
+        function leave() { hg.style.display = "none"; tip.style.opacity = "0"; }
+        zone.addEventListener("pointermove", move);
+        zone.addEventListener("pointerleave", leave);
+        zone.addEventListener("touchstart", move, { passive: true });
+      }
+
+      /* ---------------- Daily trend with country filter ---------------- */
+      const dailyState = { selected: new Set(Object.keys(DATA.daily.series)) };
+      const chipsEl = document.getElementById("country-chips");
+      Object.keys(DATA.daily.series).forEach(cc => {
+        const b = document.createElement("button");
+        b.className = "chip"; b.type = "button";
+        b.style.setProperty("--c", COUNTRY_COLORS[cc]);
+        b.setAttribute("aria-pressed", "true");
+        b.innerHTML = `<span class="dot"></span>${cc} · ${COUNTRY_NAMES[cc]}`;
+        b.addEventListener("click", () => {
+          if (dailyState.selected.has(cc)) {
+            if (dailyState.selected.size === 1) return;
+            dailyState.selected.delete(cc); b.setAttribute("aria-pressed", "false");
+          } else {
+            dailyState.selected.add(cc); b.setAttribute("aria-pressed", "true");
+          }
+          renderDaily();
+        });
+        chipsEl.appendChild(b);
+      });
+
+      function renderDaily() {
+        const dates = DATA.daily.dates;
+        const sel = Object.keys(DATA.daily.series).filter(cc => dailyState.selected.has(cc));
+        const totals = dates.map((_, i) => sel.reduce((a, cc) => a + DATA.daily.series[cc][i], 0));
+        const series = [];
+        if (sel.length > 1) {
+          sel.forEach(cc => series.push({
+            key: cc, name: cc, color: COUNTRY_COLORS[cc], width: 1.4,
+            values: DATA.daily.series[cc]
+          }));
+        }
+        series.push({
+          key: "__total", name: sel.length === 1 ? sel[0] : "All selected",
+          color: sel.length === 1 ? COUNTRY_COLORS[sel[0]] : cssVar("--orange"),
+          width: 2.4, values: totals
+        });
+        const labels = dates.map((d, i) => {
+          const dt = new Date(d + "T00:00:00");
+          return i === 0 || dt.getDate() <= 7 && dates[i - 1].slice(0, 7) !== d.slice(0, 7)
+            ? MONTH_SHORT[dt.getMonth()] : "";
+        });
+        /* build month-start labels only */
+        const monthLabels = dates.map((d, i) =>
+          (i === 0 || d.slice(0, 7) !== dates[i - 1].slice(0, 7)) ? MONTH_SHORT[+d.slice(5, 7) - 1] : "");
+        lineChart({
+          el: document.getElementById("daily-chart"),
+          tip: document.getElementById("daily-tip"),
+          labels: monthLabels, height: 320, dots: false, area: sel.length === 1,
+          series, leadKey: "__total",
+          tipTotal: sel.length > 1,
+          aria: "Line chart of daily events from 27 March to 23 September 2025",
+          tipTitle: i => {
+            const d = dates[i], dt = new Date(d + "T00:00:00");
+            return `${dt.getDate()} ${MONTH_SHORT[dt.getMonth()]} ${dt.getFullYear()}`;
+          }
+        });
+      }
+
+      /* ---------------- MAU charts with legend toggles ---------------- */
+      function mauChart(elId, tipId, legendId, source, colors, names) {
+        const state = { hidden: new Set() };
+        const months = source.months.map(mo => MONTH_SHORT[+mo.slice(5, 7) - 1]);
+        const partial = new Set([0, months.length - 1]);
+        const legendEl = document.getElementById(legendId);
+        Object.keys(source.series).forEach(key => {
+          const b = document.createElement("button");
+          b.className = "legend-item"; b.type = "button";
+          b.style.setProperty("--c", colors[key]);
+          b.setAttribute("aria-pressed", "true");
+          b.innerHTML = `<span class="sw"></span>${names[key]}`;
+          b.addEventListener("click", () => {
+            if (state.hidden.has(key)) { state.hidden.delete(key); b.setAttribute("aria-pressed", "true"); }
+            else {
+              if (Object.keys(source.series).length - state.hidden.size === 1) return;
+              state.hidden.add(key); b.setAttribute("aria-pressed", "false");
+            }
+            draw();
+          });
+          legendEl.appendChild(b);
+        });
+        function draw() {
+          const series = Object.keys(source.series)
+            .filter(k => !state.hidden.has(k))
+            .map(k => ({
+              key: k, name: names[k], color: colors[k], width: 2.2,
+              values: source.series[k], dash: k === "unknown" ? "5 4" : null
+            }));
+          /* lead series for hover dot = largest visible */
+          series.sort((a, b) => Math.max(...b.values) - Math.max(...a.values));
+          lineChart({
+            el: document.getElementById(elId), tip: document.getElementById(tipId),
+            labels: months, height: 290, dots: true, series, partialIdx: partial,
+            aria: "Line chart of monthly active users",
+            tipTitle: i => `${months[i]} ${source.months[i].slice(0, 4)}${partial.has(i) ? " (partial month)" : ""}`
+          });
+        }
+        draw();
+        return draw;
+      }
+
+      /* ---------------- Total MAU bars ---------------- */
+      function totalMauChart() {
+        const months = DATA.mau_country.months;
+        const totals = DATA.mau_total;
+        const W = 920, H = 210, m = { t: 22, r: 10, b: 26, l: 46 };
+        const iw = W - m.l - m.r, ih = H - m.t - m.b;
+        const grid = cssVar("--grid"), axis = cssVar("--axis");
+        const yMax = niceMax(1200);
+        const Y = v => m.t + ih - (v / yMax) * ih;
+        const bw = iw / totals.length;
+        let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Bar chart of total monthly active users">`;
+        for (let t = 0; t <= 4; t++) {
+          const v = (yMax / 4) * t, y = Y(v);
+          svg += `<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="${grid}"/>`;
+          svg += `<text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${axis}">${fmt(Math.round(v))}</text>`;
+        }
+        totals.forEach((v, i) => {
+          const partial = i === 0 || i === totals.length - 1;
+          const x = m.l + i * bw + bw * 0.18, w = bw * 0.64;
+          const color = partial ? cssVar("--axis") : "#ED7D31";
+          svg += `<rect class="mau-bar" data-i="${i}" x="${x}" y="${Y(v)}" width="${w}" height="${Y(0) - Y(v)}" rx="4" fill="${color}" opacity="${partial ? 0.55 : 1}"/>`;
+          svg += `<text x="${x + w / 2}" y="${Y(v) - 7}" text-anchor="middle" font-size="12.5" font-weight="700" fill="${cssVar("--text")}">${fmt(v)}</text>`;
+          const lab = MONTH_SHORT[+months[i].slice(5, 7) - 1] + (partial ? "*" : "");
+          svg += `<text x="${x + w / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${axis}">${lab}</text>`;
+        });
+        svg += `</svg>`;
+        const el = document.getElementById("mau-total-chart");
+        el.innerHTML = svg;
+        const tip = document.getElementById("mau-total-tip");
+        el.querySelectorAll(".mau-bar").forEach(bar => {
+          bar.addEventListener("pointermove", evt => {
+            const i = +bar.dataset.i;
+            const partial = i === 0 || i === totals.length - 1;
+            tip.innerHTML = `<div class="tt-title">${MONTH_SHORT[+months[i].slice(5, 7) - 1]} ${months[i].slice(0, 4)}${partial ? " (partial)" : ""}</div><div class="tt-row"><span>Active users</span><b>${fmt(totals[i])}</b></div>`;
+            const box = el.parentElement.getBoundingClientRect();
+            tip.style.opacity = "1";
+            tip.style.left = Math.min(box.width - 190, Math.max(0, evt.clientX - box.left + 12)) + "px";
+            tip.style.top = Math.max(0, evt.clientY - box.top - 8) + "px";
+          });
+          bar.addEventListener("pointerleave", () => { tip.style.opacity = "0"; });
+        });
+      }
+
+      /* ---------------- Q2 country bars ---------------- */
+      function q2Bars() {
+        const max = Math.max(...DATA.q2_country.map(r => r.users));
+        document.getElementById("q2-bars").innerHTML = DATA.q2_country.map((r, i) => `
+          <div class="bar-row">
+            <span class="cc">${r.country}</span>
+            <div class="bar-track"><div class="bar-fill${i === 0 ? " lead" : ""}" style="width:${(r.users / max * 100).toFixed(1)}%"></div></div>
+            <span class="vals"><b>${fmt(r.users)}</b> users <small>· ${fmt(r.events)} events</small></span>
+          </div>`).join("");
+      }
+
+      /* ---------------- Device donut ---------------- */
+      function deviceDonut() {
+        const parts = [
+          { name: "Android", key: "android", color: "#ED7D31" },
+          { name: "iOS", key: "ios", color: "#2E75B6" },
+          { name: "Desktop", key: "desktop", color: "#98A4B8" }
+        ];
+        const total = parts.reduce((a, p) => a + DATA.device[p.key], 0);
+        const cx = 90, cy = 90, r = 72, sw = 30;
+        const C = 2 * Math.PI * r;
+        let off = 0, arcs = "";
+        parts.forEach(p => {
+          const frac = DATA.device[p.key] / total;
+          const len = Math.max(0, frac * C - 3);
+          arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.color}" stroke-width="${sw}" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;
+          off += frac * C;
+        });
+        document.getElementById("device-donut").innerHTML =
+          `<svg class="chart" viewBox="0 0 180 180" style="width:150px" role="img" aria-label="Donut chart of sessions by device">
+             ${arcs}
+             <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="21" font-weight="750" fill="${cssVar("--text")}">${fmt(total)}</text>
+             <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="11" fill="${cssVar("--muted")}">sessions</text>
+           </svg>`;
+        document.getElementById("device-legend").innerHTML = parts.map(p => {
+          const v = DATA.device[p.key], pct = (v / total * 100).toFixed(1);
+          return `<div class="dl-row"><span class="sw" style="background:${p.color}"></span>${p.name}<span class="dl-val">${fmt(v)} <small>(${pct}%)</small></span></div>`;
+        }).join("");
+      }
+
+      /* ---------------- Event mix ---------------- */
+      function eventMix() {
+        const entries = Object.entries(DATA.event_mix).sort((a, b) => b[1] - a[1]);
+        const max = entries[0][1];
+        document.getElementById("event-mix").innerHTML = entries.map(([k, v]) => `
+          <div class="mix-row">
+            <span class="m-name">${k.replace(/_/g, " ")}</span>
+            <div class="m-track"><div class="m-fill" style="width:${(v / max * 100).toFixed(1)}%"></div></div>
+            <span class="m-val">${fmt(v)}</span>
+          </div>`).join("");
+      }
+
+      /* ---------------- Funnel ---------------- */
+      function funnel() {
+        const stages = DATA.funnel;
+        const names = {
+          page_view: "Page View", product_view: "Product View", add_to_cart: "Add to Cart",
+          checkout: "Checkout", purchase: "Purchase"
+        };
+        const max = stages[0].users;
+        let html = "";
+        stages.forEach((s, i) => {
+          if (i > 0) {
+            const conv = (s.users / stages[i - 1].users * 100).toFixed(1);
+            html += `<div class="f-conv">&#8595; <b>${conv}%</b> of the previous stage continued</div>`;
+          }
+          html += `
+          <div class="f-stage">
+            <span class="f-name">${names[s.stage]}</span>
+            <div class="f-track"><div class="f-bar" style="width:${(s.users / max * 100).toFixed(1)}%"></div></div>
+            <span class="f-val">${fmt(s.users)}<small>users · ${(s.users / max * 100).toFixed(1)}%</small></span>
+          </div>`;
+        });
+        document.getElementById("funnel").innerHTML = html;
+      }
+
+      /* ---------------- render all ---------------- */
+      let redrawMauChannel, redrawMauCountry;
+      function changeTable(id, src, names, head) {
+        const a = src.months.indexOf("2025-04"), b = src.months.indexOf("2025-08");
+        const rows = Object.keys(src.series).map(k => { const x = src.series[k][a], y = src.series[k][b]; return { n: names[k], x, y, p: (y - x) / x * 100 }; }).sort((u, v) => v.p - u.p);
+        document.getElementById(id).innerHTML = `<table class="tbl"><thead><tr><th scope="col">${head}</th><th scope="col">Apr</th><th scope="col">Aug</th><th scope="col">Change</th></tr></thead><tbody>` +
+          rows.map(r => `<tr><td>${r.n}</td><td>${fmt(r.x)}</td><td>${fmt(r.y)}</td><td class="${r.p >= 0 ? "up" : "down"}">${r.p >= 0 ? "+" : "\u2212"}${Math.abs(r.p).toFixed(1)}%</td></tr>`).join("") + `</tbody></table>`;
+      }
+      renderDaily();
+      redrawMauChannel = mauChart("mau-channel-chart", "mau-channel-tip", "mau-channel-legend", DATA.mau_channel, CHANNEL_COLORS, CHANNEL_NAMES);
+      redrawMauCountry = mauChart("mau-country-chart", "mau-country-tip", "mau-country-legend", DATA.mau_country, COUNTRY_COLORS, COUNTRY_NAMES);
+      totalMauChart();
+      q2Bars();
+      deviceDonut();
+      eventMix();
+      funnel();
+      changeTable("chg-channel", DATA.mau_channel, CHANNEL_NAMES, "Channel");
+      changeTable("chg-country", DATA.mau_country, COUNTRY_NAMES, "Country");
+
+      const onScheme = () => { renderDaily(); redrawMauChannel(); redrawMauCountry(); totalMauChart(); deviceDonut(); };
+      if (window.matchMedia) {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        if (mq.addEventListener) mq.addEventListener("change", onScheme);
+      }
+      new MutationObserver(onScheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    </script>
+  </body>
+</html>
